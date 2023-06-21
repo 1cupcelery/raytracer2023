@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <targets>
+      <target name="WSL - Ubuntu" type="wsl" uuid="81ae46b0-3d67-4dee-a3ba-f11a46b1a218">
+        <config>
+          <option name="distributionMsId" value="Ubuntu" />
+          <option name="projectRootOnTarget" value="/mnt/c/Program Files/JetBrains/CLion 2022.2.3/jbr/bin&#10;/raytracer2023" />
+        </config>
+        <ContributedStateBase type="RsLanguageRuntime">
+          <config>
+            <option name="cargoPath" value="/home/celery/.cargo/bin/cargo" />
+            <option name="cargoVersion" value="1.70.0 (ec8a8a0ca 2023-04-25)" />
+            <option name="rustcPath" value="/home/celery/.cargo/bin/rustc" />
+            <option name="rustcVersion" value="1.70.0 (90c541806 2023-05-31)" />
+          </config>
+        </ContributedStateBase>
+      </target>
+    </targets>
+  </component>
+</project>
