@@ -1,7 +1,7 @@
 on:
   push:
-#      tags:
-#        - "bycelery"
+      tags:
+        - "bycelery"
 
 name: CI # Continuous Integration
 
