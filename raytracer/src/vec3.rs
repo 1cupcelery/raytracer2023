@@ -41,13 +41,11 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
-    pub fn dot(&self,other:Self)->f64{
-        self.x * other.x+
-        self.y * other.y+
-        self.z * other.z
+    pub fn dot(&self, other: Self) -> f64{
+        self.x * other.x+ self.y * other.y+ self.z * other.z
     }
 
-    pub fn cross(&self,other:Self)->Self{
+    pub fn cross(&self, other: Self) -> Self {
         Self {
             x: self.y * other.z - other.y * self.z,
             y: self.z * other.x - other.z * self.x,
@@ -55,12 +53,12 @@ impl Vec3 {
         }
     }
 
-    pub fn unit_vector(&self)-> Self{
+    pub fn unit_vector(&self) -> Self{
         //if self.squared_length() == 0.0?
         Self{
-            x: self.x/self.length(),
-            y: self.y/self.length(),
-            z: self.z/self.length(),
+            x: self.x / self.length(),
+            y: self.y / self.length(),
+            z: self.z / self.length(),
         }
     }
 }
@@ -74,7 +72,7 @@ impl Add for Vec3 {
             z: self.z + other.z,
         }
     }
-}//+
+}
 
 impl Add<f64> for Vec3 {
     type Output = Self;
@@ -95,7 +93,7 @@ impl AddAssign for Vec3 {
             z: self.z + other.z,
         };
     }
-}//+=
+}
 
 impl AddAssign<f64> for Vec3 {
     fn add_assign(&mut self, other: f64) {

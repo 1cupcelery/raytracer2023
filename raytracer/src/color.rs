@@ -12,9 +12,9 @@ pub fn write_color(pixel_color: Color, img: &mut RgbImage, i: usize, j: usize) {
     //     (within(0.0, 0.999, colorz) * 256.0) as u8,
     // ]);
     *pixel = image::Rgb([
-        (pixel_color.x *255.999 as f64) as u8,
-        (pixel_color.y *255.999 as f64) as u8,
-        (pixel_color.z *255.999 as f64) as u8,
+        (pixel_color.x * 255.999 as f64) as u8,
+        (pixel_color.y * 255.999 as f64) as u8,
+        (pixel_color.z * 255.999 as f64) as u8,
     ]);
     // Write the translated [0,255] value of each color component.
 }
@@ -26,4 +26,4 @@ fn within(min: f64, max: f64, value: f64) -> f64 {
         return min;
     }
     value
-}//这里不太懂，参考了别人的代码
+}
