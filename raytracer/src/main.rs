@@ -103,7 +103,7 @@ fn main() {
     let lower_left_corner = origin
         - horizontal / 2.0
         - vertical / 2.0
-        - Vec3{
+        - Vec3 {
             x: 0.0,
             y: 0.0,
             z: focal_length,
@@ -125,7 +125,7 @@ fn main() {
         for i in 0..width {
             let u = i as f64 / (width - 1) as f64;
             let v = j as f64 / (height - 1) as f64;
-            let r=Ray{
+            let r = Ray{
                 orig: origin,
                 dir: lower_left_corner + horizontal.mul(u) + vertical.mul(v) - origin,
             };
