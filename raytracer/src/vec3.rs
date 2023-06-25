@@ -41,8 +41,8 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
-    pub fn dot(&self, other: Self) -> f64{
-        self.x * other.x+ self.y * other.y+ self.z * other.z
+    pub fn dot(&self, other: Self) -> f64 {
+        self.x * other.x + self.y * other.y + self.z * other.z
     }
 
     pub fn cross(&self, other: Self) -> Self {
@@ -53,9 +53,9 @@ impl Vec3 {
         }
     }
 
-    pub fn unit_vector(&self) -> Self{
+    pub fn unit_vector(&self) -> Self {
         //if self.squared_length() == 0.0?
-        Self{
+        Self {
             x: self.x / self.length(),
             y: self.y / self.length(),
             z: self.z / self.length(),

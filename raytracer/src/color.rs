@@ -1,5 +1,5 @@
-use image::RgbImage;
 use crate::vec3::Color;
+use image::RgbImage;
 
 pub fn write_color(pixel_color: Color, img: &mut RgbImage, i: usize, j: usize) {
     let pixel = img.get_pixel_mut(i.try_into().unwrap(), j.try_into().unwrap());
