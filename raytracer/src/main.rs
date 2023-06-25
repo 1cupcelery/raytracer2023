@@ -25,7 +25,7 @@ fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     let a = r.dir.length_squared();
     let half_b = oc.dot(r.dir);
     let c = oc.length_squared() - radius * radius;
-    let discriminant = half_b * half_b-a * c;
+    let discriminant = half_b * half_b - a * c;
     return if discriminant < 0.0 {
         -1.0
     } else {
@@ -33,7 +33,7 @@ fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     };
 }
 
-fn ray_color(r: &Ray) -> Color{
+fn ray_color(r: &Ray) -> Color {
     let mut t = hit_sphere(
         &Point3 {
             x: 0.0,
@@ -45,7 +45,7 @@ fn ray_color(r: &Ray) -> Color{
     );
     if t > 0.0 {
         let N: Vec3 = (r.at(t)
-            - Vec3{
+            - Vec3 {
                 x: 0.0,
                 y: 0.0,
                 z: -1.0,
@@ -60,7 +60,7 @@ fn ray_color(r: &Ray) -> Color{
     }
     let unit_direction: Vec3 = (&r.dir).unit_vector();
     t = 0.5 * (unit_direction.y + 1.0);
-    Color{
+    Color {
         x: (1.0 - t) * 1.0 + t * 0.5,
         y: (1.0 - t) * 1.0 + t * 0.7,
         z: (1.0 - t) * 1.0 + t * 1.0,
@@ -101,8 +101,8 @@ fn main() {
         z: 0.0,
     };
     let lower_left_corner = origin
-        - horizontal/ 2.0
-        - vertical/ 2.0
+        - horizontal / 2.0
+        - vertical / 2.0
         - Vec3{
             x: 0.0,
             y: 0.0,
@@ -123,8 +123,8 @@ fn main() {
 
     for j in 0..height {
         for i in 0..width {
-            let u = i as f64/ (width - 1) as f64;
-            let v = j as f64/ (height - 1) as f64;
+            let u = i as f64 / (width - 1) as f64;
+            let v = j as f64 / (height - 1) as f64;
             let r=Ray{
                 orig: origin,
                 dir: lower_left_corner + horizontal.mul(u) + vertical.mul(v) - origin,
