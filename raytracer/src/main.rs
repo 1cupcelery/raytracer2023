@@ -196,7 +196,7 @@ fn main() {
                 let v = (j as f64 + random_f64()) / (image_height as f64 - 1.0);
                 let r = cam.get_ray(u, v);
                 //pixel_color += ray_color(&r, &world, max_depth);
-                pixel_color += ray_color(&r, &bvh, max_depth);
+                pixel_color += ray_color(&r, &*bvh, max_depth);
             }
             write_color(
                 pixel_color,
