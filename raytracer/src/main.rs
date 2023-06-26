@@ -3,21 +3,32 @@ mod hittable;
 mod ray;
 mod sphere;
 mod vec3;
+mod hittable_list;
 
 use crate::ray::Ray;
 use crate::vec3::Color;
 use crate::vec3::Point3;
+use crate::sphere::Sphere;
+use crate::hittable_list::HittableList;
 use color::write_color;
 use image::{ImageBuffer, RgbImage};
 use indicatif::ProgressBar;
 use std::fs::File;
 use std::ops::Mul;
+use std::sync::Arc;
 pub use vec3::Vec3;
+use crate::hittable::{HitRecord, Hittable};
 
 const AUTHOR: &str = "Celery";
+const PI: f64 = 3.1415926535897932385;
+const INFINITY: f64 = f64::INFINITY;
 
 fn is_ci() -> bool {
     option_env!("CI").unwrap_or_default() == "true"
+}
+
+pub fn degrees_to_radians(degrees: f64) -> f64 {
+    degrees * std::f64::consts::PI / 180.0
 }
 
 fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
@@ -33,33 +44,14 @@ fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     }
 }
 
-fn ray_color(r: &Ray) -> Color {
-    let mut t = hit_sphere(
-        &Point3 {
-            x: 0.0,
-            y: 0.0,
-            z: -1.0,
-        },
-        0.5,
-        r,
-    );
-    if t > 0.0 {
-        let n: Vec3 = (r.at(t)
-            - Vec3 {
-                x: 0.0,
-                y: 0.0,
-                z: -1.0,
-            })
-        .unit_vector();
-        return Color {
-            x: n.x + 1.0,
-            y: n.y + 1.0,
-            z: n.z + 1.0,
-        }
-        .mul(0.5);
+fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
+    let rec: HitRecord;
+    if world.hit(r, 0.0, INFINITY).is_some() {
+        rec = world.hit(r, 0.0, INFINITY).unwrap();
+        return (rec.normal + Color{x: 1.0,y: 1.0,z: 1.0}).mul(0.5);
     }
     let unit_direction: Vec3 = r.dir.unit_vector();
-    t = 0.5 * (unit_direction.y + 1.0);
+    let t = 0.5 * (unit_direction.y + 1.0);
     Color {
         x: (1.0 - t) * 1.0 + t * 0.5,
         y: (1.0 - t) * 1.0 + t * 0.7,
@@ -79,6 +71,11 @@ fn main() {
     let height = (width as f64 / aspect_ratio) as usize;
     let path = "output/test.jpg";
     let quality = 60; // From 0 to 100, suggested value: 60
+
+    // World
+    let mut world = HittableList::new();
+    world.add(Arc::new(Sphere::new(Point3::new(0.0,0.0,-1.0), 0.5)));
+    world.add(Arc::new(Sphere::new(Point3::new(0.0,-100.5,-1.0), 100.0)));
 
     // Camera
     let viewport_height = 2.0;
@@ -129,7 +126,7 @@ fn main() {
                 orig: origin,
                 dir: lower_left_corner + horizontal.mul(u) + vertical.mul(v) - origin,
             };
-            let pixel_color = ray_color(&r);
+            let pixel_color = ray_color(&r,&world);
             write_color(pixel_color, &mut img, i, height - j - 1);
             bar.inc(1);
         }
