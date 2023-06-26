@@ -3,6 +3,7 @@ mod color;
 mod hittable;
 mod hittable_list;
 mod material;
+mod moving_sphere;
 mod ray;
 mod rtweekend;
 mod sphere;
@@ -12,6 +13,7 @@ use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
 use crate::material::{Dielectric, Lambertian, Metal};
+use crate::moving_sphere::MovingSphere;
 use crate::ray::Ray;
 use crate::rtweekend::{random_f64, random_f64_range};
 use crate::sphere::Sphere;
@@ -82,7 +84,15 @@ pub fn random_scene() -> HittableList {
                 if choose_mat < 0.8 {
                     let albedo = Color::random() * Color::random();
                     sphere_material = Arc::new(Lambertian::new(&albedo));
-                    world.add(Arc::new(Sphere::new(center, 0.2, sphere_material.clone())));
+                    let center2 = center + Vec3::new(0.0, random_f64_range(0.0, 0.5), 0.0);
+                    world.add(Arc::new(MovingSphere::new(
+                        center,
+                        center2,
+                        0.0,
+                        1.0,
+                        0.2,
+                        sphere_material.clone(),
+                    )));
                 } else if choose_mat < 0.95 {
                     let albedo = Color::random_range(0.5, 1.0);
                     let fuzz = random_f64_range(0.0, 0.5);
@@ -125,12 +135,11 @@ fn main() {
     println!("CI: {}", is_ci);
 
     // Image
-    let aspect_ratio = 3.0 / 2.0;
-    let image_width = 1200;
-    let image_height = (image_width as f64 / aspect_ratio) as usize;
+    let aspect_ratio = 16.0 / 9.0;
+    let image_width = 400;
     let path = "output/test.jpg";
     let quality = 60; // From 0 to 100, suggested value: 60
-    let samples_per_pixel: usize = 500;
+    let samples_per_pixel: usize = 100;
     let max_depth: u8 = 50;
 
     // World
@@ -142,6 +151,8 @@ fn main() {
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let dist_to_focus = 10.0;
     let aperture = 0.1;
+    let image_height = (image_width as f64 / aspect_ratio) as usize;
+
     let cam = Camera::new(
         lookfrom,
         lookat,
@@ -150,6 +161,8 @@ fn main() {
         aspect_ratio,
         aperture,
         dist_to_focus,
+        0.0,
+        1.0,
     );
 
     // Create image data
