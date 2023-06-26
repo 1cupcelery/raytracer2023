@@ -1,3 +1,5 @@
+mod aabb;
+mod bvh;
 mod camera;
 mod color;
 mod hittable;
@@ -9,6 +11,7 @@ mod rtweekend;
 mod sphere;
 mod vec3;
 
+use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
@@ -71,8 +74,8 @@ pub fn random_scene() -> HittableList {
         1000.0,
         ground_material,
     )));
-    for a in -11..10 {
-        for b in -11..10 {
+    for a in -11..11 {
+        for b in -11..11 {
             let choose_mat = random_f64();
             let center = Point3::new(
                 a as f64 + 0.9 * random_f64(),
@@ -144,6 +147,7 @@ fn main() {
 
     // World
     let world = random_scene();
+    let bvh=BvhNode::new_list(world,0.0,1.0);
 
     // Camera
     let lookfrom = Point3::new(13.0, 2.0, 3.0);
@@ -191,7 +195,8 @@ fn main() {
                 let u = (i as f64 + random_f64()) / (image_width as f64 - 1.0);
                 let v = (j as f64 + random_f64()) / (image_height as f64 - 1.0);
                 let r = cam.get_ray(u, v);
-                pixel_color += ray_color(&r, &world, max_depth);
+                //pixel_color += ray_color(&r, &world, max_depth);
+                pixel_color += ray_color(&r, &bvh, max_depth);
             }
             write_color(
                 pixel_color,

@@ -12,3 +12,7 @@ pub fn random_f64() -> f64 {
 pub fn random_f64_range(min: f64, max: f64) -> f64 {
     min + (max - min) * random_f64()
 }
+
+pub fn random_usize_range(min: usize, max: usize) -> usize {
+    rand::thread_rng().gen_range(min..max + 1)
+}

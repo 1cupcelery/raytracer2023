@@ -1,7 +1,10 @@
+use crate::aabb::{surrounding_box, AABB};
 use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
+use crate::vec3::Point3;
 pub use std::{sync::Arc, vec};
 
+#[derive(Clone)]
 pub struct HittableList {
     pub objects: Vec<Arc<dyn Hittable>>,
 }
@@ -40,5 +43,26 @@ impl Hittable for HittableList {
             }
         }
         rec
+    }
+
+    fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB> {
+        if self.objects.is_empty() {
+            return None;
+        }
+        let mut output_box = AABB::new(&Point3::zero(), &Point3::zero());
+        let mut first_box = true;
+        for object in &self.objects {
+            if let Some(tmp_box) = object.bounding_box(time0, time1) {
+                output_box = if first_box {
+                    tmp_box
+                } else {
+                    surrounding_box(output_box, tmp_box)
+                };
+                first_box = false;
+            } else {
+                return None;
+            }
+        }
+        Some(output_box)
     }
 }

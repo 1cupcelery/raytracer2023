@@ -1,3 +1,4 @@
+use crate::aabb::{surrounding_box, AABB};
 use crate::hittable::HitRecord;
 use crate::hittable::Hittable;
 use crate::material::Material;
@@ -6,6 +7,7 @@ use crate::vec3::{Point3, Vec3};
 use std::ops::Mul;
 use std::sync::Arc;
 
+#[derive(Clone)]
 pub struct MovingSphere {
     pub center0: Point3,
     pub center1: Point3,
@@ -63,6 +65,19 @@ impl Hittable for MovingSphere {
         rec.set_face_normal(r, &outward_normal);
         rec.mat_ptr = self.mat_ptr.clone();
         Some(rec)
+    }
+
+    fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<AABB> {
+        let box0 = AABB::new(
+            &(self.center(_time0) - Vec3::new(self.radius, self.radius, self.radius)),
+            &(self.center(_time0) + Vec3::new(self.radius, self.radius, self.radius)),
+        );
+        let box1 = AABB::new(
+            &(self.center(_time1) - Vec3::new(self.radius, self.radius, self.radius)),
+            &(self.center(_time1) + Vec3::new(self.radius, self.radius, self.radius)),
+        );
+        let output_box = surrounding_box(box0, box1);
+        Some(output_box)
     }
 }
 

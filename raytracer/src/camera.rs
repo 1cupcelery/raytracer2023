@@ -1,5 +1,5 @@
 use crate::ray::Ray;
-use crate::rtweekend::{degrees_to_radians, random_f64, random_f64_range};
+use crate::rtweekend::{degrees_to_radians, random_f64_range};
 use crate::vec3::{Point3, Vec3};
 use std::ops::Mul;
 
