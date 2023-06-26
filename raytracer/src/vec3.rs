@@ -2,7 +2,6 @@ use crate::rtweekend::{random_f64, random_f64_range};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 #[derive(Clone, Debug, PartialEq, Copy)]
-
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -122,19 +121,17 @@ impl Vec3 {
     }
 
     pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Vec3 {
-        let cos_theta: f64;
-        if n.dot(Self::zero().sub(*uv)) < 1.0 {
-            cos_theta = n.dot(Self::zero().sub(*uv));
+        let cos_theta = if n.dot(Self::zero().sub(*uv)) < 1.0 {
+            n.dot(Self::zero().sub(*uv))
         } else {
-            cos_theta = 1.0;
-        }
+            1.0
+        };
         let r_out_perp = (*uv + (*n).mul(cos_theta)).mul(etai_over_etat);
-        let r_out_parallel: Vec3;
-        if 1.0 - r_out_perp.length_squared() > 0.0 {
-            r_out_parallel = Self::zero().sub(n.mul((1.0 - r_out_perp.length_squared()).sqrt()));
+        let r_out_parallel = if 1.0 - r_out_perp.length_squared() > 0.0 {
+            Self::zero().sub(n.mul((1.0 - r_out_perp.length_squared()).sqrt()))
         } else {
-            r_out_parallel = Self::zero().sub(n.mul((-(1.0 - r_out_perp.length_squared())).sqrt()));
-        }
+            Self::zero().sub(n.mul((-(1.0 - r_out_perp.length_squared())).sqrt()))
+        };
         r_out_perp + r_out_parallel
     }
 

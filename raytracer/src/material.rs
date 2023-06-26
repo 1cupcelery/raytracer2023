@@ -95,28 +95,26 @@ impl Dielectric {
 impl Material for Dielectric {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
         let attenuation = Color::new(1.0, 1.0, 1.0);
-        let refraction_ratio: f64;
-        if rec.front_face {
-            refraction_ratio = 1.0 / self.ir;
+        let refraction_ratio = if rec.front_face {
+            1.0 / self.ir
         } else {
-            refraction_ratio = self.ir;
-        }
+            self.ir
+        };
         let unit_direction = r_in.dir.unit_vector();
-        let cos_theta: f64;
-        if Vec3::zero().sub(unit_direction).dot(rec.normal) < 1.0 {
-            cos_theta = Vec3::zero().sub(unit_direction).dot(rec.normal);
+        let cos_theta = if Vec3::zero().sub(unit_direction).dot(rec.normal) < 1.0 {
+            Vec3::zero().sub(unit_direction).dot(rec.normal)
         } else {
-            cos_theta = 1.0;
-        }
+            1.0
+        };
         let sin_theta: f64 = (1.0 - cos_theta * cos_theta).sqrt();
 
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
-        let direction: Vec3;
-        if cannot_refract || Self::reflectance(cos_theta, refraction_ratio) > random_f64() {
-            direction = Vec3::reflect(&unit_direction, &rec.normal);
-        } else {
-            direction = Vec3::refract(&unit_direction, &rec.normal, refraction_ratio);
-        }
+        let direction =
+            if cannot_refract || Self::reflectance(cos_theta, refraction_ratio) > random_f64() {
+                Vec3::reflect(&unit_direction, &rec.normal)
+            } else {
+                Vec3::refract(&unit_direction, &rec.normal, refraction_ratio)
+            };
         let scattered = Ray::new(&rec.p, &direction);
         Some((attenuation, scattered))
     }
