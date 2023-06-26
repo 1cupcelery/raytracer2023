@@ -1,1 +1,1 @@
-hittable_list里面不知道怎么解决tmp_rec没有初值的问题，所以参考了@JolyneFr的代码（用Option）
+hittable_list里面不知道怎么解决tmp_rec没有初值的问题，所以参考了@JolyneFr的代码（返回Option<T>）

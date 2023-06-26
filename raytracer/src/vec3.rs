@@ -1,3 +1,4 @@
+use crate::rtweekend::{random_f64, random_f64_range};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 #[derive(Clone, Debug, PartialEq, Copy)]
@@ -60,6 +61,81 @@ impl Vec3 {
             y: self.y / self.length(),
             z: self.z / self.length(),
         }
+    }
+
+    pub fn random() -> Self {
+        Self {
+            x: random_f64(),
+            y: random_f64(),
+            z: random_f64(),
+        }
+    }
+
+    pub fn random_range(min: f64, max: f64) -> Self {
+        Self {
+            x: random_f64_range(min, max),
+            y: random_f64_range(min, max),
+            z: random_f64_range(min, max),
+        }
+    }
+
+    pub fn random_in_unit_sphere() -> Vec3 {
+        let need: Vec3;
+        loop {
+            let p: Vec3 = Self::random_range(-1.0, 1.0);
+            if p.length_squared() < 1.0 {
+                need = p;
+                break;
+            }
+        }
+        need
+    }
+
+    pub fn random_unit_vector() -> Self {
+        Self::random_in_unit_sphere().unit_vector()
+    }
+
+    pub fn random_in_hemisphere(normal: &Self) -> Self {
+        let in_unit_sphere = Self::random_in_unit_sphere();
+        if in_unit_sphere.dot(*normal) > 0.0 {
+            in_unit_sphere
+        }
+        // In the same hemisphere as the normal
+        else {
+            Self::zero().sub(in_unit_sphere)
+        }
+    }
+
+    pub fn near_zero(&self) -> bool {
+        // Return true if the vector is close to zero in all dimensions.
+        let s = 0.00000001;
+        (-s < self.x)
+            && (self.x < s)
+            && (-s < self.y)
+            && (self.y < s)
+            && (-s < self.z)
+            && (self.z < s)
+    }
+
+    pub fn reflect(v: &Vec3, n: &Vec3) -> Self {
+        *v - n.mul(v.dot(*n)).mul(2.0)
+    }
+
+    pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Vec3 {
+        let mut cos_theta: f64;
+        if n.dot(Self::zero().sub(*uv)) < 1.0 {
+            cos_theta = n.dot(Self::zero().sub(*uv));
+        } else {
+            cos_theta = 1.0;
+        }
+        let r_out_perp = (*uv + (*n).mul(cos_theta)).mul(etai_over_etat);
+        let mut r_out_parallel: Vec3;
+        if 1.0 - r_out_perp.length_squared() > 0.0 {
+            r_out_parallel = Self::zero().sub(n.mul((1.0 - r_out_perp.length_squared()).sqrt()));
+        } else {
+            r_out_parallel = Self::zero().sub(n.mul((-(1.0 - r_out_perp.length_squared())).sqrt()));
+        }
+        return r_out_perp + r_out_parallel;
     }
 }
 

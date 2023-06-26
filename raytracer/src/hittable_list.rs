@@ -1,6 +1,6 @@
-pub use std::{sync::Arc, vec};
 use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
+pub use std::{sync::Arc, vec};
 
 pub struct HittableList {
     pub objects: Vec<Arc<dyn Hittable>>,
@@ -28,7 +28,7 @@ impl Hittable for HittableList {
         let mut closest_so_far = t_max;
         for object in &self.objects {
             let a = object.hit(r, t_min, closest_so_far);
-            if  let Some(tmp) = a {
+            if let Some(tmp) = a {
                 closest_so_far = tmp.t;
                 rec = Some(tmp);
             }
@@ -36,4 +36,3 @@ impl Hittable for HittableList {
         rec
     }
 }
-
