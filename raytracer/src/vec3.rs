@@ -137,6 +137,22 @@ impl Vec3 {
         }
         return r_out_perp + r_out_parallel;
     }
+
+    pub fn random_in_unit_disk() -> Vec3 {
+        let need: Vec3;
+        loop {
+            let p: Vec3 = Self::new(
+                random_f64_range(-1.0, 1.0),
+                random_f64_range(-1.0, 1.0),
+                0.0,
+            );
+            if p.length_squared() < 1.0 {
+                need = p;
+                break;
+            }
+        }
+        need
+    }
 }
 
 impl Add for Vec3 {

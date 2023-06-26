@@ -1,4 +1,5 @@
 use crate::ray::Ray;
+use crate::rtweekend::degrees_to_radians;
 use crate::vec3::{Point3, Vec3};
 use std::ops::Mul;
 
@@ -7,56 +8,53 @@ pub struct Camera {
     lower_left_corner: Point3,
     horizontal: Vec3,
     vertical: Vec3,
+    u: Vec3,
+    v: Vec3,
+    w: Vec3,
+    lens_radius: f64,
 }
 
 impl Camera {
-    pub fn new() -> Self {
-        let aspect_ratio = 16.0 / 9.0;
-        let viewport_height = 2.0;
+    pub fn new(
+        lookfrom: Point3,
+        lookat: Point3,
+        vup: Vec3,
+        vfov: f64,
+        aspect_ratio: f64,
+        aperture: f64,
+        focus_dist: f64,
+    ) -> Self {
+        let theta = degrees_to_radians(vfov);
+        let h = (theta / 2.0).tan();
+        let viewport_height = 2.0 * h;
         let viewport_width = aspect_ratio * viewport_height;
-        let focal_length = 1.0;
+        let w0 = (lookfrom - lookat).unit_vector();
+        let u0 = vup.cross(w0).unit_vector();
+        let v0 = w0.cross(u0);
+        let horizontal0 = u0.mul(viewport_width as f64).mul(focus_dist);
+        let vertical0 = v0.mul(viewport_height as f64).mul(focus_dist);
+        let lower_left_corner0 =
+            lookfrom - horizontal0 / 2.0 - vertical0 / 2.0 - w0.mul(focus_dist);
         Self {
-            origin: Point3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            horizontal: Vec3 {
-                x: viewport_width,
-                y: 0.0,
-                z: 0.0,
-            },
-            vertical: Vec3 {
-                x: 0.0,
-                y: viewport_height,
-                z: 0.0,
-            },
-            lower_left_corner: Point3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            } - Vec3 {
-                x: viewport_width,
-                y: 0.0,
-                z: 0.0,
-            } / 2.0
-                - Vec3 {
-                    x: 0.0,
-                    y: viewport_height,
-                    z: 0.0,
-                } / 2.0
-                - Vec3 {
-                    x: 0.0,
-                    y: 0.0,
-                    z: focal_length,
-                },
+            w: w0,
+            u: u0,
+            v: v0,
+            origin: lookfrom,
+            horizontal: horizontal0,
+            vertical: vertical0,
+            lower_left_corner: lower_left_corner0,
+            lens_radius: aperture / 2.0,
         }
     }
 
-    pub fn get_ray(&self, u: f64, v: f64) -> Ray {
+    pub fn get_ray(&self, s: f64, t: f64) -> Ray {
+        let rd = Vec3::random_in_unit_disk().mul(self.lens_radius);
+        let offset = self.u.mul(rd.x) + self.v.mul(rd.y);
         Ray::new(
-            &self.origin,
-            &(self.lower_left_corner + self.horizontal.mul(u) + self.vertical.mul(v) - self.origin),
+            &(self.origin + offset),
+            &(self.lower_left_corner + self.horizontal.mul(s) + self.vertical.mul(t)
+                - self.origin
+                - offset),
         )
     }
 }
