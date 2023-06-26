@@ -6,7 +6,7 @@ pub fn write_color(
     img: &mut RgbImage,
     i: usize,
     j: usize,
-    samples_per_pixel: u8,
+    samples_per_pixel: usize,
 ) {
     let pixel = img.get_pixel_mut(i.try_into().unwrap(), j.try_into().unwrap());
     let mut r = pixel_color.x;

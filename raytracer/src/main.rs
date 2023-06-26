@@ -130,8 +130,8 @@ fn main() {
     let image_height = (image_width as f64 / aspect_ratio) as usize;
     let path = "output/test.jpg";
     let quality = 60; // From 0 to 100, suggested value: 60
-    let samples_per_pixel: u8 = 50;
-    let max_depth: u8 = 500;
+    let samples_per_pixel: usize = 500;
+    let max_depth: u8 = 50;
 
     // World
     let world = random_scene();
