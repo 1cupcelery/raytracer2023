@@ -26,7 +26,7 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+    fn scatter(&self, _r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
         let mut scatter_direction = rec.normal + Vec3::random_unit_vector();
         // Catch degenerate scatter direction
         if scatter_direction.near_zero() {
@@ -45,12 +45,7 @@ pub struct Metal {
 
 impl Metal {
     pub fn new(c: &Color, f: &f64) -> Self {
-        let f0: f64;
-        if *f < 1.0 {
-            f0 = *f;
-        } else {
-            f0 = 1.0;
-        }
+        let f0 = if *f < 1.0 { *f } else { 1.0 };
         Self {
             albedo: Color {
                 x: c.x,
@@ -100,14 +95,14 @@ impl Dielectric {
 impl Material for Dielectric {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
         let attenuation = Color::new(1.0, 1.0, 1.0);
-        let mut refraction_ratio: f64;
+        let refraction_ratio: f64;
         if rec.front_face {
             refraction_ratio = 1.0 / self.ir;
         } else {
             refraction_ratio = self.ir;
         }
         let unit_direction = r_in.dir.unit_vector();
-        let mut cos_theta: f64;
+        let cos_theta: f64;
         if Vec3::zero().sub(unit_direction).dot(rec.normal) < 1.0 {
             cos_theta = Vec3::zero().sub(unit_direction).dot(rec.normal);
         } else {
@@ -116,7 +111,7 @@ impl Material for Dielectric {
         let sin_theta: f64 = (1.0 - cos_theta * cos_theta).sqrt();
 
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
-        let mut direction: Vec3;
+        let direction: Vec3;
         if cannot_refract || Self::reflectance(cos_theta, refraction_ratio) > random_f64() {
             direction = Vec3::reflect(&unit_direction, &rec.normal);
         } else {

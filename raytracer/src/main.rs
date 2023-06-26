@@ -9,7 +9,7 @@ mod sphere;
 mod vec3;
 
 use crate::camera::Camera;
-use crate::hittable::{HitRecord, Hittable};
+use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
 use crate::material::{Dielectric, Lambertian, Metal};
 use crate::ray::Ray;
@@ -27,30 +27,15 @@ use std::sync::Arc;
 pub use vec3::Vec3;
 
 const AUTHOR: &str = "Celery";
-const PI: f64 = 3.1415926535897932385;
 const INFINITY: f64 = f64::INFINITY;
 
 fn is_ci() -> bool {
     option_env!("CI").unwrap_or_default() == "true"
 }
 
-fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
-    let oc: Vec3 = r.orig - *center;
-    let a = r.dir.length_squared();
-    let half_b = oc.dot(r.dir);
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = half_b * half_b - a * c;
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (-half_b - discriminant.sqrt()) / a
-    }
-}
-
 fn ray_color(r: &Ray, world: &dyn Hittable, depth: u8) -> Color {
-    let rec: HitRecord;
     // If we've exceeded the ray bounce limit, no more light is gathered.
-    if depth <= 0 {
+    if depth == 0 {
         return Color {
             x: 0.0,
             y: 0.0,
@@ -93,7 +78,7 @@ pub fn random_scene() -> HittableList {
                 b as f64 + 0.9 * random_f64(),
             );
             if center.sub(Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
-                let mut sphere_material: Arc<dyn Material>;
+                let sphere_material: Arc<dyn Material>;
                 if choose_mat < 0.8 {
                     let albedo = Color::random() * Color::random();
                     sphere_material = Arc::new(Lambertian::new(&albedo));
@@ -189,7 +174,7 @@ fn main() {
                 y: 0.0,
                 z: 0.0,
             };
-            for s in 0..samples_per_pixel {
+            for _s in 0..samples_per_pixel {
                 let u = (i as f64 + random_f64()) / (image_width as f64 - 1.0);
                 let v = (j as f64 + random_f64()) / (image_height as f64 - 1.0);
                 let r = cam.get_ray(u, v);

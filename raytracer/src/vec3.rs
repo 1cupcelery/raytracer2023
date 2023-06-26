@@ -122,20 +122,20 @@ impl Vec3 {
     }
 
     pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Vec3 {
-        let mut cos_theta: f64;
+        let cos_theta: f64;
         if n.dot(Self::zero().sub(*uv)) < 1.0 {
             cos_theta = n.dot(Self::zero().sub(*uv));
         } else {
             cos_theta = 1.0;
         }
         let r_out_perp = (*uv + (*n).mul(cos_theta)).mul(etai_over_etat);
-        let mut r_out_parallel: Vec3;
+        let r_out_parallel: Vec3;
         if 1.0 - r_out_perp.length_squared() > 0.0 {
             r_out_parallel = Self::zero().sub(n.mul((1.0 - r_out_perp.length_squared()).sqrt()));
         } else {
             r_out_parallel = Self::zero().sub(n.mul((-(1.0 - r_out_perp.length_squared())).sqrt()));
         }
-        return r_out_perp + r_out_parallel;
+        r_out_perp + r_out_parallel
     }
 
     pub fn random_in_unit_disk() -> Vec3 {

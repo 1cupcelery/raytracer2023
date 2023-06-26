@@ -10,7 +10,7 @@ pub struct Camera {
     vertical: Vec3,
     u: Vec3,
     v: Vec3,
-    w: Vec3,
+    //w: Vec3,
     lens_radius: f64,
 }
 
@@ -31,12 +31,12 @@ impl Camera {
         let w0 = (lookfrom - lookat).unit_vector();
         let u0 = vup.cross(w0).unit_vector();
         let v0 = w0.cross(u0);
-        let horizontal0 = u0.mul(viewport_width as f64).mul(focus_dist);
-        let vertical0 = v0.mul(viewport_height as f64).mul(focus_dist);
+        let horizontal0 = u0.mul(viewport_width).mul(focus_dist);
+        let vertical0 = v0.mul(viewport_height).mul(focus_dist);
         let lower_left_corner0 =
             lookfrom - horizontal0 / 2.0 - vertical0 / 2.0 - w0.mul(focus_dist);
         Self {
-            w: w0,
+            //w: w0,
             u: u0,
             v: v0,
             origin: lookfrom,
