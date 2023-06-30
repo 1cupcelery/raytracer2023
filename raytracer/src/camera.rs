@@ -25,8 +25,8 @@ impl Camera {
         aspect_ratio: f64,
         aperture: f64,
         focus_dist: f64,
-        time0: f64,
-        time1: f64,
+        //time0: f64,
+        //time1: f64,
     ) -> Self {
         let theta = degrees_to_radians(vfov);
         let h = (theta / 2.0).tan();
@@ -48,8 +48,10 @@ impl Camera {
             vertical: vertical0,
             lower_left_corner: lower_left_corner0,
             lens_radius: aperture / 2.0,
-            time0,
-            time1,
+            // time0,
+            // time1,
+            time0: 0.0,
+            time1: 1.0,
         }
     }
 
