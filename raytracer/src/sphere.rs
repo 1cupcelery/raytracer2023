@@ -1,4 +1,4 @@
-use crate::aabb::AABB;
+use crate::aabb::Aabb;
 use crate::hittable::HitRecord;
 use crate::hittable::Hittable;
 use crate::material::Material;
@@ -58,8 +58,8 @@ impl Hittable for Sphere {
         Some(rec)
     }
 
-    fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<AABB> {
-        let output_box = AABB::new(
+    fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<Aabb> {
+        let output_box = Aabb::new(
             &(self.center - Vec3::new(self.radius, self.radius, self.radius)),
             &(self.center + Vec3::new(self.radius, self.radius, self.radius)),
         );

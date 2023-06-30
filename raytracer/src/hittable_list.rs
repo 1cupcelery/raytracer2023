@@ -1,4 +1,4 @@
-use crate::aabb::{surrounding_box, AABB};
+use crate::aabb::{surrounding_box, Aabb};
 use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
 use crate::vec3::Point3;
@@ -45,11 +45,11 @@ impl Hittable for HittableList {
         rec
     }
 
-    fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB> {
+    fn bounding_box(&self, time0: f64, time1: f64) -> Option<Aabb> {
         if self.objects.is_empty() {
             return None;
         }
-        let mut output_box = AABB::new(&Point3::zero(), &Point3::zero());
+        let mut output_box = Aabb::new(&Point3::zero(), &Point3::zero());
         let mut first_box = true;
         for object in &self.objects {
             if let Some(tmp_box) = object.bounding_box(time0, time1) {

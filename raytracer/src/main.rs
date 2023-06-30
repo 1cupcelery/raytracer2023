@@ -147,7 +147,7 @@ fn main() {
 
     // World
     let world = random_scene();
-    let bvh=BvhNode::new_list(world,0.0,1.0);
+    let bvh = BvhNode::new_list(world, 0.0, 1.0);
 
     // Camera
     let lookfrom = Point3::new(13.0, 2.0, 3.0);
