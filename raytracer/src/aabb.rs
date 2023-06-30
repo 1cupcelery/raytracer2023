@@ -17,9 +17,7 @@ impl AABB {
         }
     }
 
-    pub fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> bool {
-        let mut tmin = t_min;
-        let mut tmax = t_max;
+    pub fn hit(&self, r: &Ray, mut t_min: f64, mut t_max: f64) -> bool {
         for a in 0..3 {
             let inv_d = 1.0 / r.dir[a];
             let mut t0 = (self.minimum[a] - r.orig[a]) * inv_d;
@@ -27,8 +25,8 @@ impl AABB {
             if inv_d < 0.0 {
                 swap(&mut t0, &mut t1);
             }
-            tmin = t0.max(tmin);
-            tmax = t1.min(tmax);
+            t_min = t0.max(t_min);
+            t_max = t1.min(t_max);
             if t_max <= t_min {
                 return false;
             }
