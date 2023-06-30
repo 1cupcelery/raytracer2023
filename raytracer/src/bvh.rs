@@ -78,11 +78,6 @@ impl Hittable for BvhNode {
         return if self.box_0.hit(ray, t_min, t_max) {
              if let Some(hit_left) = self.left.hit(ray, t_min, t_max) {
                 if let Some(hit_right) = self.right.hit(ray, t_min, hit_left.t) {
-                    // if hit_left.t < hit_right.t {
-                    //      Some(hit_left)
-                    // } else {
-                    //     Some(hit_right)
-                    // }
                     Some(hit_right)
                 } else {
                     Some(hit_left)

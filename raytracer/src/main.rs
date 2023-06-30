@@ -74,8 +74,8 @@ pub fn random_scene() -> HittableList {
         1000.0,
         ground_material,
     )));
-    for a in -11..11 {
-        for b in -11..11 {
+    for a in -11..10 {
+        for b in -11..10 {
             let choose_mat = random_f64();
             let center = Point3::new(
                 a as f64 + 0.9 * random_f64(),
