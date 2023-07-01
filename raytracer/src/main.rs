@@ -6,6 +6,7 @@ mod hittable;
 mod hittable_list;
 mod material;
 mod moving_sphere;
+mod perlin;
 mod ray;
 mod rtweekend;
 mod sphere;
@@ -22,6 +23,7 @@ use crate::ray::Ray;
 use crate::rtweekend::{random_f64, random_f64_range};
 use crate::sphere::Sphere;
 use crate::texture::CheckerTexture;
+use crate::texture::NoiseTexture;
 use crate::vec3::Color;
 use crate::vec3::Point3;
 use color::write_color;
@@ -161,6 +163,22 @@ fn two_spheres() -> HittableList {
     objects
 }
 
+pub fn two_perlin_spheres() -> HittableList {
+    let mut objects = HittableList::new();
+    let pertext = Arc::new(NoiseTexture::new());
+    objects.add(Arc::new(Sphere::new(
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        Arc::new(Lambertian::new(pertext.clone())),
+    )));
+    objects.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 2.0, 0.0),
+        2.0,
+        Arc::new(Lambertian::new(pertext)),
+    )));
+    objects
+}
+
 fn main() {
     // get environment variable CI, which is true for GitHub Actions
     let is_ci = is_ci();
@@ -184,7 +202,7 @@ fn main() {
     let mut vfov = 40.0;
     let mut aperture = 0.0;
 
-    let case = 2;
+    let case = 3;
     match case {
         1 => {
             world = random_scene();
@@ -195,6 +213,12 @@ fn main() {
         }
         2 => {
             world = two_spheres();
+            lookfrom = Point3::new(13.0, 2.0, 3.0);
+            lookat = Point3::new(0.0, 0.0, 0.0);
+            vfov = 20.0;
+        }
+        3 => {
+            world = two_perlin_spheres();
             lookfrom = Point3::new(13.0, 2.0, 3.0);
             lookat = Point3::new(0.0, 0.0, 0.0);
             vfov = 20.0;

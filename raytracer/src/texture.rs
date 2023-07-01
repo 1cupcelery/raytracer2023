@@ -1,5 +1,7 @@
+use crate::perlin::Perlin;
 use crate::vec3::Point3;
 use crate::Color;
+use std::ops::Mul;
 use std::sync::Arc;
 
 pub trait Texture {
@@ -62,5 +64,22 @@ impl Texture for CheckerTexture {
         } else {
             self.even.value(u, v, p)
         }
+    }
+}
+
+pub struct NoiseTexture {
+    noise: Perlin,
+}
+
+impl NoiseTexture {
+    pub fn new() -> Self {
+        Self {
+            noise: Perlin::new(),
+        }
+    }
+}
+impl Texture for NoiseTexture {
+    fn value(&self, _u: f64, _v: f64, p: &Point3) -> Color {
+        Color::new(1.0, 1.0, 1.0).mul(self.noise.noise(p))
     }
 }
