@@ -142,6 +142,25 @@ pub fn random_scene() -> HittableList {
     world
 }
 
+fn two_spheres() -> HittableList {
+    let mut objects = HittableList::new();
+    let checker = Arc::new(CheckerTexture::new_color(
+        Color::new(0.2, 0.3, 0.1),
+        Color::new(0.9, 0.9, 0.9),
+    ));
+    objects.add(Arc::new(Sphere::new(
+        Point3::new(0.0, -10.0, 0.0),
+        10.0,
+        Arc::new(Lambertian::new(checker.clone())),
+    )));
+    objects.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 10.0, 0.0),
+        10.0,
+        Arc::new(Lambertian::new(checker)),
+    )));
+    objects
+}
+
 fn main() {
     // get environment variable CI, which is true for GitHub Actions
     let is_ci = is_ci();
@@ -157,22 +176,60 @@ fn main() {
     let max_depth: u8 = 50;
 
     // World
-    let world = random_scene();
+    // let world = random_scene();
+    // let bvh = BvhNode::new_list(world, 0.0, 1.0);
+    let mut world = HittableList::new();
+    let mut lookfrom = Point3::new(13.0, 2.0, 3.0);
+    let mut lookat = Point3::new(0.0, 0.0, 0.0);
+    let mut vfov = 40.0;
+    let mut aperture = 0.0;
+
+    let case = 2;
+    match case {
+        1 => {
+            world = random_scene();
+            lookfrom = Point3::new(13.0, 2.0, 3.0);
+            lookat = Point3::new(0.0, 0.0, 0.0);
+            vfov = 20.0;
+            aperture = 0.1;
+        }
+        2 => {
+            world = two_spheres();
+            lookfrom = Point3::new(13.0, 2.0, 3.0);
+            lookat = Point3::new(0.0, 0.0, 0.0);
+            vfov = 20.0;
+        }
+        _ => {}
+    }
     let bvh = BvhNode::new_list(world, 0.0, 1.0);
 
     // Camera
-    let lookfrom = Point3::new(13.0, 2.0, 3.0);
-    let lookat = Point3::new(0.0, 0.0, 0.0);
+    // let lookfrom = Point3::new(13.0, 2.0, 3.0);
+    // let lookat = Point3::new(0.0, 0.0, 0.0);
+    // let vup = Vec3::new(0.0, 1.0, 0.0);
+    // let dist_to_focus = 10.0;
+    // let aperture = 0.1;
+    // let image_height = (image_width as f64 / aspect_ratio) as usize;
+    //
+    // let cam = Camera::new(
+    //     lookfrom,
+    //     lookat,
+    //     vup,
+    //     20.0,
+    //     aspect_ratio,
+    //     aperture,
+    //     dist_to_focus,
+    //     0.0,
+    //     1.0,
+    // );
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let dist_to_focus = 10.0;
-    let aperture = 0.1;
     let image_height = (image_width as f64 / aspect_ratio) as usize;
-
     let cam = Camera::new(
         lookfrom,
         lookat,
         vup,
-        20.0,
+        vfov,
         aspect_ratio,
         aperture,
         dist_to_focus,
