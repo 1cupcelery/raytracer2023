@@ -9,6 +9,7 @@ mod moving_sphere;
 mod ray;
 mod rtweekend;
 mod sphere;
+mod texture;
 mod vec3;
 
 use crate::bvh::BvhNode;
@@ -20,6 +21,7 @@ use crate::moving_sphere::MovingSphere;
 use crate::ray::Ray;
 use crate::rtweekend::{random_f64, random_f64_range};
 use crate::sphere::Sphere;
+use crate::texture::CheckerTexture;
 use crate::vec3::Color;
 use crate::vec3::Point3;
 use color::write_color;
@@ -68,11 +70,20 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: u8) -> Color {
 
 pub fn random_scene() -> HittableList {
     let mut world = HittableList::new();
-    let ground_material = Arc::new(Lambertian::new(&Color::new(0.5, 0.5, 0.5)));
+    // let ground_material = Arc::new(Lambertian::new(&Color::new(0.5, 0.5, 0.5)));
+    // world.add(Arc::new(Sphere::new(
+    //     Point3::new(0.0, -1000.0, 0.0),
+    //     1000.0,
+    //     ground_material,
+    // )));
+    let checker = Arc::new(CheckerTexture::new_color(
+        Color::new(0.2, 0.3, 0.1),
+        Color::new(0.9, 0.9, 0.9),
+    ));
     world.add(Arc::new(Sphere::new(
         Point3::new(0.0, -1000.0, 0.0),
         1000.0,
-        ground_material,
+        Arc::new(Lambertian::new(checker)),
     )));
     for a in -11..10 {
         for b in -11..10 {
@@ -86,7 +97,7 @@ pub fn random_scene() -> HittableList {
                 let sphere_material: Arc<dyn Material>;
                 if choose_mat < 0.8 {
                     let albedo = Color::random() * Color::random();
-                    sphere_material = Arc::new(Lambertian::new(&albedo));
+                    sphere_material = Arc::new(Lambertian::new_color(&albedo));
                     let center2 = center + Vec3::new(0.0, random_f64_range(0.0, 0.5), 0.0);
                     world.add(Arc::new(MovingSphere::new(
                         center,
@@ -115,7 +126,7 @@ pub fn random_scene() -> HittableList {
         material1,
     )));
 
-    let material2 = Arc::new(Lambertian::new(&Color::new(0.4, 0.2, 0.1)));
+    let material2 = Arc::new(Lambertian::new_color(&Color::new(0.4, 0.2, 0.1)));
     world.add(Arc::new(Sphere::new(
         Point3::new(-4.0, 1.0, 0.0),
         1.0,
@@ -165,6 +176,8 @@ fn main() {
         aspect_ratio,
         aperture,
         dist_to_focus,
+        0.0,
+        1.0,
     );
 
     // Create image data

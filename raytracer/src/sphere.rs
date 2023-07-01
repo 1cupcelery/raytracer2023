@@ -5,6 +5,7 @@ use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::Point3;
 use crate::vec3::Vec3;
+use std::f64::consts::PI;
 pub use std::sync::Arc;
 
 #[derive(Clone)]
@@ -25,6 +26,14 @@ impl Sphere {
             radius: r,
             mat_ptr: m,
         }
+    }
+
+    pub fn get_sphere_uv(p: &Point3) -> (f64, f64) {
+        let theta = (-p.y).acos();
+        let phi = (-p.z()).atan2(p.x()) + PI;
+        let u = phi / (2.0 * PI);
+        let v = theta / PI;
+        (u, v)
     }
 }
 
@@ -54,6 +63,9 @@ impl Hittable for Sphere {
         rec.p = r.at(rec.t);
         let outward_normal: Vec3 = (rec.p - self.center) / self.radius;
         rec.set_face_normal(r, &outward_normal);
+        let (u1, v1) = Sphere::get_sphere_uv(&outward_normal);
+        rec.u = u1;
+        rec.v = v1;
         rec.mat_ptr = self.mat_ptr.clone();
         Some(rec)
     }
