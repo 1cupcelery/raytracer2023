@@ -1,5 +1,6 @@
 mod aabb;
 mod aarect;
+mod box_object;
 mod bvh;
 mod camera;
 mod color;
@@ -15,6 +16,7 @@ mod texture;
 mod vec3;
 
 use crate::aarect::{XyRect, XzRect, YzRect};
+use crate::box_object::BoxObject;
 use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::hittable::Hittable;
@@ -219,7 +221,24 @@ pub fn cornell_box() -> HittableList {
         555.0,
         white.clone(),
     )));
-    objects.add(Arc::new(XyRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
+    objects.add(Arc::new(XyRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        white.clone(),
+    )));
+    objects.add(Arc::new(BoxObject::new(
+        Point3::new(130.0, 0.0, 65.0),
+        Point3::new(295.0, 165.0, 230.0),
+        white.clone(),
+    )));
+    objects.add(Arc::new(BoxObject::new(
+        Point3::new(265.0, 0.0, 295.0),
+        Point3::new(430.0, 330.0, 460.0),
+        white,
+    )));
     objects
 }
 
