@@ -141,9 +141,9 @@ pub struct DiffuseLight {
 }
 
 impl DiffuseLight {
-    pub fn new(a: Arc<dyn Texture>) -> Self {
-        Self { emit: a }
-    }
+    // pub fn new(a: Arc<dyn Texture>) -> Self {
+    //     Self { emit: a }
+    // }
 
     pub fn new_color(c: Color) -> Self {
         Self {
