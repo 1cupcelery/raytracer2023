@@ -93,4 +93,16 @@ impl Perlin {
             (*p).swap(j, target);
         }
     }
+
+    pub fn turb(&self, p: &Point3, depth: usize) -> f64 {
+        let mut accum = 0.0;
+        let mut tmp_p = *p;
+        let mut weight = 1.0;
+        for _i in 0..depth {
+            accum += weight * self.noise(&tmp_p);
+            weight *= 0.5;
+            tmp_p *= 2.0;
+        } //depth=7
+        accum.abs()
+    }
 }
