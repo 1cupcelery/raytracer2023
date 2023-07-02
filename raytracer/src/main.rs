@@ -19,7 +19,7 @@ use crate::aarect::{XyRect, XzRect, YzRect};
 use crate::box_object::BoxObject;
 use crate::bvh::BvhNode;
 use crate::camera::Camera;
-use crate::hittable::Hittable;
+use crate::hittable::{Hittable, RotateY, Translate};
 use crate::hittable_list::HittableList;
 use crate::material::{Dielectric, DiffuseLight, Lambertian, Metal};
 use crate::moving_sphere::MovingSphere;
@@ -229,16 +229,33 @@ pub fn cornell_box() -> HittableList {
         555.0,
         white.clone(),
     )));
-    objects.add(Arc::new(BoxObject::new(
-        Point3::new(130.0, 0.0, 65.0),
-        Point3::new(295.0, 165.0, 230.0),
+    // objects.add(Arc::new(BoxObject::new(
+    //     Point3::new(130.0, 0.0, 65.0),
+    //     Point3::new(295.0, 165.0, 230.0),
+    //     white.clone(),
+    // )));
+    // objects.add(Arc::new(BoxObject::new(
+    //     Point3::new(265.0, 0.0, 295.0),
+    //     Point3::new(430.0, 330.0, 460.0),
+    //     white,
+    // )));
+    let box1_0 = Arc::new(BoxObject::new(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 330.0, 165.0),
         white.clone(),
-    )));
-    objects.add(Arc::new(BoxObject::new(
-        Point3::new(265.0, 0.0, 295.0),
-        Point3::new(430.0, 330.0, 460.0),
+    ));
+    let box1_1 = Arc::new(RotateY::new(box1_0, 15.0));
+    let box1_2 = Arc::new(Translate::new(box1_1, Vec3::new(265.0, 0.0, 295.0)));
+    objects.add(box1_2);
+
+    let box2_0 = Arc::new(BoxObject::new(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 165.0, 165.0),
         white,
-    )));
+    ));
+    let box2_1 = Arc::new(RotateY::new(box2_0, -18.0));
+    let box2_2 = Arc::new(Translate::new(box2_1, Vec3::new(130.0, 0.0, 65.0)));
+    objects.add(box2_2);
     objects
 }
 

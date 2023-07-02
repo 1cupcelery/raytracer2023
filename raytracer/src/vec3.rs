@@ -1,5 +1,5 @@
 use crate::rtweekend::{random_f64, random_f64_range};
-use std::ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign};
 
 #[derive(Clone, Debug, PartialEq, Copy)]
 pub struct Vec3 {
@@ -306,6 +306,17 @@ impl Index<usize> for Vec3 {
             0 => &self.x,
             1 => &self.y,
             2 => &self.z,
+            _ => panic!(),
+        }
+    }
+}
+
+impl IndexMut<usize> for Vec3 {
+    fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
+        match idx {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
             _ => panic!(),
         }
     }
