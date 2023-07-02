@@ -14,7 +14,7 @@ mod sphere;
 mod texture;
 mod vec3;
 
-use crate::aarect::XyRect;
+use crate::aarect::{XyRect, XzRect, YzRect};
 use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::hittable::Hittable;
@@ -60,33 +60,10 @@ fn ray_color(r: &Ray, background: &Color, world: &dyn Hittable, depth: u8) -> Co
     } else {
         *background
     }
-    // if let Some(rec) = world.hit(r, 0.001, INFINITY) {
-    //     if let Some((attenuation, scattered)) = rec.mat_ptr.scatter(r, &rec) {
-    //         return attenuation.mul(ray_color(&scattered, world, depth - 1));
-    //     }
-    //     return Color {
-    //         x: 0.0,
-    //         y: 0.0,
-    //         z: 0.0,
-    //     };
-    // }
-    // let unit_direction: Vec3 = r.dir.unit_vector();
-    // let t = 0.5 * (unit_direction.y + 1.0);
-    // Color {
-    //     x: (1.0 - t) * 1.0 + t * 0.5,
-    //     y: (1.0 - t) * 1.0 + t * 0.7,
-    //     z: (1.0 - t) * 1.0 + t * 1.0,
-    // }
 }
 
 pub fn random_scene() -> HittableList {
     let mut world = HittableList::new();
-    // let ground_material = Arc::new(Lambertian::new(&Color::new(0.5, 0.5, 0.5)));
-    // world.add(Arc::new(Sphere::new(
-    //     Point3::new(0.0, -1000.0, 0.0),
-    //     1000.0,
-    //     ground_material,
-    // )));
     let checker = Arc::new(CheckerTexture::new_color(
         Color::new(0.2, 0.3, 0.1),
         Color::new(0.9, 0.9, 0.9),
@@ -215,6 +192,37 @@ pub fn simple_light() -> HittableList {
     objects
 }
 
+pub fn cornell_box() -> HittableList {
+    let mut objects = HittableList::new();
+    let red = Arc::new(Lambertian::new_color(&Color::new(0.65, 0.05, 0.05)));
+    let white = Arc::new(Lambertian::new_color(&Color::new(0.73, 0.73, 0.73)));
+    let green = Arc::new(Lambertian::new_color(&Color::new(0.12, 0.45, 0.15)));
+    let light = Arc::new(DiffuseLight::new_color(Color::new(15.0, 15.0, 15.0)));
+    objects.add(Arc::new(YzRect::new(0.0, 555.0, 0.0, 555.0, 555.0, green)));
+    objects.add(Arc::new(YzRect::new(0.0, 555.0, 0.0, 555.0, 0.0, red)));
+    objects.add(Arc::new(XzRect::new(
+        213.0, 343.0, 227.0, 332.0, 554.0, light,
+    )));
+    objects.add(Arc::new(XzRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        0.0,
+        white.clone(),
+    )));
+    objects.add(Arc::new(XzRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        white.clone(),
+    )));
+    objects.add(Arc::new(XyRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
+    objects
+}
+
 fn main() {
     // get environment variable CI, which is true for GitHub Actions
     let is_ci = is_ci();
@@ -222,8 +230,8 @@ fn main() {
     println!("CI: {}", is_ci);
 
     // Image
-    let aspect_ratio = 16.0 / 9.0;
-    let image_width = 400;
+    let mut aspect_ratio = 16.0 / 9.0;
+    let mut image_width = 400;
     let path = "output/test.jpg";
     let quality = 60; // From 0 to 100, suggested value: 60
     let mut samples_per_pixel: usize = 100;
@@ -239,7 +247,7 @@ fn main() {
     let mut aperture = 0.0;
     let mut background = Color::zero();
 
-    let case = 5;
+    let case = 6;
     match case {
         1 => {
             world = random_scene();
@@ -278,29 +286,21 @@ fn main() {
             lookat = Point3::new(0.0, 2.0, 0.0);
             vfov = 20.0;
         }
+        6 => {
+            world = cornell_box();
+            aspect_ratio = 1.0;
+            image_width = 600;
+            samples_per_pixel = 200;
+            background = Color::zero();
+            lookfrom = Point3::new(278.0, 278.0, -800.0);
+            lookat = Point3::new(278.0, 278.0, 0.0);
+            vfov = 40.0;
+        }
         _ => {}
     }
     let bvh = BvhNode::new_list(world, 0.0, 1.0);
 
     // Camera
-    // let lookfrom = Point3::new(13.0, 2.0, 3.0);
-    // let lookat = Point3::new(0.0, 0.0, 0.0);
-    // let vup = Vec3::new(0.0, 1.0, 0.0);
-    // let dist_to_focus = 10.0;
-    // let aperture = 0.1;
-    // let image_height = (image_width as f64 / aspect_ratio) as usize;
-    //
-    // let cam = Camera::new(
-    //     lookfrom,
-    //     lookat,
-    //     vup,
-    //     20.0,
-    //     aspect_ratio,
-    //     aperture,
-    //     dist_to_focus,
-    //     0.0,
-    //     1.0,
-    // );
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let dist_to_focus = 10.0;
     let image_height = (image_width as f64 / aspect_ratio) as usize;

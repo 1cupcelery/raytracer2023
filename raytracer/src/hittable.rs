@@ -20,16 +20,8 @@ pub struct HitRecord {
 impl HitRecord {
     pub fn new(p1: Point3, n1: Vec3, m1: Arc<dyn Material>, t1: f64) -> Self {
         Self {
-            p: Point3 {
-                x: p1.x,
-                y: p1.y,
-                z: p1.z,
-            },
-            normal: Vec3 {
-                x: n1.x,
-                y: n1.y,
-                z: n1.z,
-            },
+            p: p1,
+            normal: n1,
             t: t1,
             mat_ptr: m1,
             u: 0.0,
