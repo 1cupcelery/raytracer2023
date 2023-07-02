@@ -55,21 +55,6 @@ impl Perlin {
         Self::perlin_interp(&c, u, v, w)
     }
 
-    // fn trilinear_interp(c: &[Vec<Vec<f64>>], u: f64, v: f64, w: f64) -> f64 {
-    //     let mut accum = 0.0;
-    //     for (i, item1) in c.iter().enumerate().take(2) {
-    //         for (j, item2) in item1.iter().enumerate().take(2) {
-    //             for (k, _item3) in item2.iter().enumerate().take(2) {
-    //                 accum += (i as f64 * u + (1 - i) as f64 * (1.0 - u))
-    //                     * (j as f64 * v + (1 - j) as f64 * (1.0 - v))
-    //                     * (k as f64 * w + (1 - k) as f64 * (1.0 - w))
-    //                     * c[i][j][k];
-    //             }
-    //         }
-    //     }
-    //     accum
-    // }
-
     fn perlin_interp(c: &[Vec<Vec<Vec3>>], u: f64, v: f64, w: f64) -> f64 {
         let uu = u * u * (3.0 - 2.0 * u);
         let vv = v * v * (3.0 - 2.0 * v);
