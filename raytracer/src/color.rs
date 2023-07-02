@@ -18,14 +18,14 @@ pub fn write_color(
     g = (scale * g).sqrt();
     b = (scale * b).sqrt();
     *pixel = image::Rgb([
-        (champ(r, 0.0, 0.999) * 256.0) as u8,
-        (champ(g, 0.0, 0.999) * 256.0) as u8,
-        (champ(b, 0.0, 0.999) * 256.0) as u8,
+        (clamp(r, 0.0, 0.999) * 256.0) as u8,
+        (clamp(g, 0.0, 0.999) * 256.0) as u8,
+        (clamp(b, 0.0, 0.999) * 256.0) as u8,
     ]);
     // Write the translated [0,255] value of each color component.
 }
 
-pub fn champ(value: f64, min: f64, max: f64) -> f64 {
+pub fn clamp(value: f64, min: f64, max: f64) -> f64 {
     if value > max {
         return max;
     }

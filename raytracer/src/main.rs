@@ -22,8 +22,8 @@ use crate::moving_sphere::MovingSphere;
 use crate::ray::Ray;
 use crate::rtweekend::{random_f64, random_f64_range};
 use crate::sphere::Sphere;
-use crate::texture::CheckerTexture;
 use crate::texture::NoiseTexture;
+use crate::texture::{CheckerTexture, ImageTexture};
 use crate::vec3::Color;
 use crate::vec3::Point3;
 use color::write_color;
@@ -179,6 +179,15 @@ pub fn two_perlin_spheres() -> HittableList {
     objects
 }
 
+pub fn earth() -> HittableList {
+    let mut objects = HittableList::new();
+    let earth_texture = Arc::new(ImageTexture::new("earthmap.jpg"));
+    let earth_surface = Arc::new(Lambertian::new(earth_texture));
+    let globe = Arc::new(Sphere::new(Point3::zero(), 2.0, earth_surface));
+    objects.add(globe);
+    objects
+}
+
 fn main() {
     // get environment variable CI, which is true for GitHub Actions
     let is_ci = is_ci();
@@ -202,7 +211,7 @@ fn main() {
     let mut vfov = 40.0;
     let mut aperture = 0.0;
 
-    let case = 3;
+    let case = 4;
     match case {
         1 => {
             world = random_scene();
@@ -219,6 +228,12 @@ fn main() {
         }
         3 => {
             world = two_perlin_spheres();
+            lookfrom = Point3::new(13.0, 2.0, 3.0);
+            lookat = Point3::new(0.0, 0.0, 0.0);
+            vfov = 20.0;
+        }
+        4 => {
+            world = earth();
             lookfrom = Point3::new(13.0, 2.0, 3.0);
             lookat = Point3::new(0.0, 0.0, 0.0);
             vfov = 20.0;
