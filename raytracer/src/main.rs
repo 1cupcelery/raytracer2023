@@ -1,4 +1,5 @@
 mod aabb;
+mod aarect;
 mod bvh;
 mod camera;
 mod color;
@@ -13,11 +14,12 @@ mod sphere;
 mod texture;
 mod vec3;
 
+use crate::aarect::XyRect;
 use crate::bvh::BvhNode;
 use crate::camera::Camera;
 use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
-use crate::material::{Dielectric, Lambertian, Metal};
+use crate::material::{Dielectric, DiffuseLight, Lambertian, Metal};
 use crate::moving_sphere::MovingSphere;
 use crate::ray::Ray;
 use crate::rtweekend::{random_f64, random_f64_range};
@@ -42,32 +44,39 @@ fn is_ci() -> bool {
     option_env!("CI").unwrap_or_default() == "true"
 }
 
-fn ray_color(r: &Ray, world: &dyn Hittable, depth: u8) -> Color {
+fn ray_color(r: &Ray, background: &Color, world: &dyn Hittable, depth: u8) -> Color {
     // If we've exceeded the ray bounce limit, no more light is gathered.
     if depth == 0 {
-        return Color {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        };
+        return Color::zero();
     }
+    // If the ray hits nothing, return the background color.
     if let Some(rec) = world.hit(r, 0.001, INFINITY) {
+        let emitted = rec.mat_ptr.emitted(rec.u, rec.v, &rec.p);
         if let Some((attenuation, scattered)) = rec.mat_ptr.scatter(r, &rec) {
-            return attenuation.mul(ray_color(&scattered, world, depth - 1));
+            emitted + attenuation.mul(ray_color(&scattered, background, world, depth - 1))
+        } else {
+            emitted
         }
-        return Color {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        };
+    } else {
+        *background
     }
-    let unit_direction: Vec3 = r.dir.unit_vector();
-    let t = 0.5 * (unit_direction.y + 1.0);
-    Color {
-        x: (1.0 - t) * 1.0 + t * 0.5,
-        y: (1.0 - t) * 1.0 + t * 0.7,
-        z: (1.0 - t) * 1.0 + t * 1.0,
-    }
+    // if let Some(rec) = world.hit(r, 0.001, INFINITY) {
+    //     if let Some((attenuation, scattered)) = rec.mat_ptr.scatter(r, &rec) {
+    //         return attenuation.mul(ray_color(&scattered, world, depth - 1));
+    //     }
+    //     return Color {
+    //         x: 0.0,
+    //         y: 0.0,
+    //         z: 0.0,
+    //     };
+    // }
+    // let unit_direction: Vec3 = r.dir.unit_vector();
+    // let t = 0.5 * (unit_direction.y + 1.0);
+    // Color {
+    //     x: (1.0 - t) * 1.0 + t * 0.5,
+    //     y: (1.0 - t) * 1.0 + t * 0.7,
+    //     z: (1.0 - t) * 1.0 + t * 1.0,
+    // }
 }
 
 pub fn random_scene() -> HittableList {
@@ -188,6 +197,24 @@ pub fn earth() -> HittableList {
     objects
 }
 
+pub fn simple_light() -> HittableList {
+    let mut objects = HittableList::new();
+    let pertext = Arc::new(NoiseTexture::new(4.0));
+    objects.add(Arc::new(Sphere::new(
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        Arc::new(Lambertian::new(pertext.clone())),
+    )));
+    objects.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 2.0, 0.0),
+        2.0,
+        Arc::new(Lambertian::new(pertext)),
+    )));
+    let difflight = Arc::new(DiffuseLight::new_color(Color::new(4.0, 4.0, 4.0)));
+    objects.add(Arc::new(XyRect::new(3.0, 5.0, 1.0, 3.0, -2.0, difflight)));
+    objects
+}
+
 fn main() {
     // get environment variable CI, which is true for GitHub Actions
     let is_ci = is_ci();
@@ -199,7 +226,7 @@ fn main() {
     let image_width = 400;
     let path = "output/test.jpg";
     let quality = 60; // From 0 to 100, suggested value: 60
-    let samples_per_pixel: usize = 100;
+    let mut samples_per_pixel: usize = 100;
     let max_depth: u8 = 50;
 
     // World
@@ -210,11 +237,13 @@ fn main() {
     let mut lookat = Point3::new(0.0, 0.0, 0.0);
     let mut vfov = 40.0;
     let mut aperture = 0.0;
+    let mut background = Color::zero();
 
-    let case = 4;
+    let case = 5;
     match case {
         1 => {
             world = random_scene();
+            background = Color::new(0.70, 0.80, 1.00);
             lookfrom = Point3::new(13.0, 2.0, 3.0);
             lookat = Point3::new(0.0, 0.0, 0.0);
             vfov = 20.0;
@@ -222,20 +251,31 @@ fn main() {
         }
         2 => {
             world = two_spheres();
+            background = Color::new(0.70, 0.80, 1.00);
             lookfrom = Point3::new(13.0, 2.0, 3.0);
             lookat = Point3::new(0.0, 0.0, 0.0);
             vfov = 20.0;
         }
         3 => {
             world = two_perlin_spheres();
+            background = Color::new(0.70, 0.80, 1.00);
             lookfrom = Point3::new(13.0, 2.0, 3.0);
             lookat = Point3::new(0.0, 0.0, 0.0);
             vfov = 20.0;
         }
         4 => {
             world = earth();
+            background = Color::new(0.70, 0.80, 1.00);
             lookfrom = Point3::new(13.0, 2.0, 3.0);
             lookat = Point3::new(0.0, 0.0, 0.0);
+            vfov = 20.0;
+        }
+        5 => {
+            world = simple_light();
+            samples_per_pixel = 400;
+            background = Color::zero();
+            lookfrom = Point3::new(26.0, 3.0, 6.0);
+            lookat = Point3::new(0.0, 2.0, 0.0);
             vfov = 20.0;
         }
         _ => {}
@@ -303,7 +343,7 @@ fn main() {
                 let v = (j as f64 + random_f64()) / (image_height as f64 - 1.0);
                 let r = cam.get_ray(u, v);
                 //pixel_color += ray_color(&r, &world, max_depth);
-                pixel_color += ray_color(&r, &*bvh, max_depth);
+                pixel_color += ray_color(&r, &background, &*bvh, max_depth);
             }
             write_color(
                 pixel_color,

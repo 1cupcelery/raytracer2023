@@ -2,13 +2,14 @@ use crate::hittable::HitRecord;
 use crate::ray::Ray;
 use crate::rtweekend::random_f64;
 use crate::texture::{SolidColor, Texture};
-use crate::vec3::Color;
+use crate::vec3::{Color, Point3};
 use crate::Vec3;
 use std::ops::{Mul, Sub};
 use std::sync::Arc;
 
 pub trait Material {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
+    fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color;
 }
 
 pub struct Lambertian {
@@ -37,6 +38,10 @@ impl Material for Lambertian {
         let scattered = Ray::new(&rec.p, &scatter_direction, r_in.tm);
         let attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
         Some((attenuation, scattered))
+    }
+
+    fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Color {
+        Color::zero()
     }
 }
 
@@ -73,6 +78,10 @@ impl Material for Metal {
         } else {
             None
         }
+    }
+
+    fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Color {
+        Color::zero()
     }
 }
 
@@ -120,5 +129,35 @@ impl Material for Dielectric {
             };
         let scattered = Ray::new(&rec.p, &direction, r_in.tm);
         Some((attenuation, scattered))
+    }
+
+    fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Color {
+        Color::zero()
+    }
+}
+
+pub struct DiffuseLight {
+    emit: Arc<dyn Texture>,
+}
+
+impl DiffuseLight {
+    pub fn new(a: Arc<dyn Texture>) -> Self {
+        Self { emit: a }
+    }
+
+    pub fn new_color(c: Color) -> Self {
+        Self {
+            emit: Arc::new(SolidColor::new(c)),
+        }
+    }
+}
+
+impl Material for DiffuseLight {
+    fn scatter(&self, _r_in: &Ray, _rec: &HitRecord) -> Option<(Color, Ray)> {
+        None
+    }
+
+    fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color {
+        self.emit.value(u, v, p)
     }
 }
