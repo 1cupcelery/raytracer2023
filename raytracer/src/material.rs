@@ -7,7 +7,7 @@ use crate::Vec3;
 use std::ops::{Mul, Sub};
 use std::sync::Arc;
 
-pub trait Material {
+pub trait Material: Send + Sync {
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
     fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color;
 }

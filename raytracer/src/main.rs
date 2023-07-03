@@ -33,12 +33,14 @@ use crate::texture::{CheckerTexture, ImageTexture};
 use crate::vec3::Color;
 use crate::vec3::Point3;
 use color::write_color;
-use image::{ImageBuffer, RgbImage};
+use image::ImageBuffer;
 use indicatif::ProgressBar;
 use material::Material;
 use std::fs::File;
 use std::ops::{Mul, Sub};
+use std::sync::mpsc::channel;
 use std::sync::Arc;
+use threadpool::ThreadPool;
 pub use vec3::Vec3;
 
 const AUTHOR: &str = "Celery";
@@ -509,7 +511,7 @@ fn main() {
             world = final_scene();
             aspect_ratio = 1.0;
             image_width = 800;
-            samples_per_pixel = 100; //10000
+            samples_per_pixel = 10000; //10000
             background = Color::zero();
             lookfrom = Point3::new(478.0, 278.0, -600.0);
             lookat = Point3::new(278.0, 278.0, 0.0);
@@ -536,42 +538,68 @@ fn main() {
     );
 
     // Create image data
-    let mut img: RgbImage = ImageBuffer::new(
-        image_width.try_into().unwrap(),
-        image_height.try_into().unwrap(),
-    );
+    // let mut img: RgbImage = ImageBuffer::new(
+    //     image_width.try_into().unwrap(),
+    //     image_height.try_into().unwrap(),
+    // );
 
     // Progress bar UI powered by library `indicatif`
     // You can use indicatif::ProgressStyle to make it more beautiful
     // You can also use indicatif::MultiProgress in multi-threading to show progress of each thread
+    let parts = 20;
+    let workers = 20;
     let bar = if is_ci {
         ProgressBar::hidden()
     } else {
         ProgressBar::new((image_height * image_width) as u64)
     };
 
-    for j in 0..image_height {
-        for i in 0..image_width {
-            let mut pixel_color = Color {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            };
-            for _s in 0..samples_per_pixel {
-                let u = (i as f64 + random_f64()) / (image_width as f64 - 1.0);
-                let v = (j as f64 + random_f64()) / (image_height as f64 - 1.0);
-                let r = cam.get_ray(u, v);
-                //pixel_color += ray_color(&r, &world, max_depth);
-                pixel_color += ray_color(&r, &background, &*bvh, max_depth);
+    let (sender, receiver) = channel();
+    let pool = ThreadPool::new(workers);
+    for t in 0..parts {
+        let bar0 = bar.clone();
+        let cam0 = cam.clone();
+        let bvh0 = bvh.clone();
+        let sender0 = sender.clone();
+        pool.execute(move || {
+            let begin = image_height * t / parts;
+            let end = image_height * (t + 1) / parts;
+            let mut part_img =
+                ImageBuffer::new(image_width as u32, image_height as u32 / parts as u32);
+            for j in begin..end {
+                for i in 0..image_width {
+                    let mut pixel_color = Color {
+                        x: 0.0,
+                        y: 0.0,
+                        z: 0.0,
+                    };
+                    for _s in 0..samples_per_pixel {
+                        let u = (i as f64 + random_f64()) / (image_width as f64 - 1.0);
+                        let v = (j as f64 + random_f64()) / (image_height as f64 - 1.0);
+                        let r = cam0.get_ray(u, v);
+                        //pixel_color += ray_color(&r, &world, max_depth);
+                        pixel_color += ray_color(&r, &background, &*bvh0, max_depth);
+                    }
+                    write_color(
+                        pixel_color,
+                        &mut part_img,
+                        i,
+                        j - image_height * t / parts,
+                        samples_per_pixel,
+                    );
+                    bar0.inc(1);
+                }
             }
-            write_color(
-                pixel_color,
-                &mut img,
-                i,
-                image_height - j - 1,
-                samples_per_pixel,
-            );
-            bar.inc(1);
+            sender0.send((begin..end, part_img)).unwrap();
+        });
+    }
+    let mut img = ImageBuffer::new(image_width as u32, image_height as u32);
+    for (rows, data) in receiver.iter().take(parts) {
+        for (index, row) in rows.enumerate() {
+            for col in 0..image_width {
+                *img.get_pixel_mut(col as u32, (image_height - row - 1) as u32) =
+                    *data.get_pixel(col as u32, index as u32);
+            }
         }
     }
 

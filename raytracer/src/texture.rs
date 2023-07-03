@@ -8,7 +8,7 @@ use std::sync::Arc;
 
 const BYTES_PER_PIXEL: usize = 3;
 
-pub trait Texture {
+pub trait Texture: Send + Sync {
     fn value(&self, u: f64, v: f64, p: &Point3) -> Color;
 }
 
