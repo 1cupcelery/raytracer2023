@@ -40,6 +40,7 @@ use std::fs::File;
 use std::ops::{Mul, Sub};
 use std::sync::mpsc::channel;
 use std::sync::Arc;
+use std::time::SystemTime;
 use threadpool::ThreadPool;
 pub use vec3::Vec3;
 
@@ -426,6 +427,8 @@ pub fn final_scene() -> HittableList {
 }
 
 fn main() {
+    let sys_time1 = SystemTime::now();
+
     // get environment variable CI, which is true for GitHub Actions
     let is_ci = is_ci();
 
@@ -511,7 +514,7 @@ fn main() {
             world = final_scene();
             aspect_ratio = 1.0;
             image_width = 800;
-            samples_per_pixel = 10000; //10000
+            samples_per_pixel = 4000; //10000
             background = Color::zero();
             lookfrom = Point3::new(478.0, 278.0, -600.0);
             lookat = Point3::new(278.0, 278.0, 0.0);
@@ -547,7 +550,7 @@ fn main() {
     // You can use indicatif::ProgressStyle to make it more beautiful
     // You can also use indicatif::MultiProgress in multi-threading to show progress of each thread
     let parts = 20;
-    let workers = 20;
+    let workers = 7;
     let bar = if is_ci {
         ProgressBar::hidden()
     } else {
@@ -607,11 +610,15 @@ fn main() {
     bar.finish();
 
     // Output image to file
-    println!("Ouput image as \"{}\"\n Author: {}", path, AUTHOR);
+    println!("Ouput image as \"{}\"\nAuthor: {}", path, AUTHOR);
     let output_image = image::DynamicImage::ImageRgb8(img);
     let mut output_file = File::create(path).unwrap();
     match output_image.write_to(&mut output_file, image::ImageOutputFormat::Jpeg(quality)) {
         Ok(_) => {}
         Err(_) => println!("Outputting image fails."),
     }
+
+    let sys_time2 = SystemTime::now();
+    let difference = sys_time2.duration_since(sys_time1).unwrap();
+    println!("Running time: {:?}", difference);
 }
