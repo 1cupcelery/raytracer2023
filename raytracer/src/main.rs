@@ -4,6 +4,7 @@ mod box_object;
 mod bvh;
 mod camera;
 mod color;
+mod constant_medium;
 mod hittable;
 mod hittable_list;
 mod material;
@@ -19,6 +20,7 @@ use crate::aarect::{XyRect, XzRect, YzRect};
 use crate::box_object::BoxObject;
 use crate::bvh::BvhNode;
 use crate::camera::Camera;
+use crate::constant_medium::ConstantMedium;
 use crate::hittable::{Hittable, RotateY, Translate};
 use crate::hittable_list::HittableList;
 use crate::material::{Dielectric, DiffuseLight, Lambertian, Metal};
@@ -229,16 +231,6 @@ pub fn cornell_box() -> HittableList {
         555.0,
         white.clone(),
     )));
-    // objects.add(Arc::new(BoxObject::new(
-    //     Point3::new(130.0, 0.0, 65.0),
-    //     Point3::new(295.0, 165.0, 230.0),
-    //     white.clone(),
-    // )));
-    // objects.add(Arc::new(BoxObject::new(
-    //     Point3::new(265.0, 0.0, 295.0),
-    //     Point3::new(430.0, 330.0, 460.0),
-    //     white,
-    // )));
     let box1_0 = Arc::new(BoxObject::new(
         Point3::new(0.0, 0.0, 0.0),
         Point3::new(165.0, 330.0, 165.0),
@@ -256,6 +248,71 @@ pub fn cornell_box() -> HittableList {
     let box2_1 = Arc::new(RotateY::new(box2_0, -18.0));
     let box2_2 = Arc::new(Translate::new(box2_1, Vec3::new(130.0, 0.0, 65.0)));
     objects.add(box2_2);
+    objects
+}
+
+pub fn cornell_smoke() -> HittableList {
+    let mut objects = HittableList::new();
+    let red = Arc::new(Lambertian::new_color(&Color::new(0.65, 0.05, 0.05)));
+    let white = Arc::new(Lambertian::new_color(&Color::new(0.73, 0.73, 0.73)));
+    let green = Arc::new(Lambertian::new_color(&Color::new(0.12, 0.45, 0.15)));
+    let light = Arc::new(DiffuseLight::new_color(Color::new(7.0, 7.0, 7.0)));
+    objects.add(Arc::new(YzRect::new(0.0, 555.0, 0.0, 555.0, 555.0, green)));
+    objects.add(Arc::new(YzRect::new(0.0, 555.0, 0.0, 555.0, 0.0, red)));
+    objects.add(Arc::new(XzRect::new(
+        113.0, 443.0, 127.0, 432.0, 554.0, light,
+    )));
+    objects.add(Arc::new(XzRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        white.clone(),
+    )));
+    objects.add(Arc::new(XzRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        0.0,
+        white.clone(),
+    )));
+    objects.add(Arc::new(XyRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        white.clone(),
+    )));
+
+    let box1_0 = Arc::new(BoxObject::new(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 330.0, 165.0),
+        white.clone(),
+    ));
+    let box1_1 = Arc::new(RotateY::new(box1_0, 15.0));
+    let box1_2 = Arc::new(Translate::new(box1_1, Vec3::new(265.0, 0.0, 295.0)));
+
+    let box2_0 = Arc::new(BoxObject::new(
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 165.0, 165.0),
+        white,
+    ));
+    let box2_1 = Arc::new(RotateY::new(box2_0, -18.0));
+    let box2_2 = Arc::new(Translate::new(box2_1, Vec3::new(130.0, 0.0, 65.0)));
+
+    objects.add(Arc::new(ConstantMedium::new_color(
+        box1_2,
+        0.01,
+        Color::zero(),
+    )));
+    objects.add(Arc::new(ConstantMedium::new_color(
+        box2_2,
+        0.01,
+        Color::new(1.0, 1.0, 1.0),
+    )));
     objects
 }
 
@@ -283,7 +340,7 @@ fn main() {
     let mut aperture = 0.0;
     let mut background = Color::zero();
 
-    let case = 6;
+    let case = 7;
     match case {
         1 => {
             world = random_scene();
@@ -328,6 +385,15 @@ fn main() {
             image_width = 600;
             samples_per_pixel = 200;
             background = Color::zero();
+            lookfrom = Point3::new(278.0, 278.0, -800.0);
+            lookat = Point3::new(278.0, 278.0, 0.0);
+            vfov = 40.0;
+        }
+        7 => {
+            world = cornell_smoke();
+            aspect_ratio = 1.0;
+            image_width = 600;
+            samples_per_pixel = 200;
             lookfrom = Point3::new(278.0, 278.0, -800.0);
             lookat = Point3::new(278.0, 278.0, 0.0);
             vfov = 40.0;

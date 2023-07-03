@@ -141,10 +141,6 @@ pub struct DiffuseLight {
 }
 
 impl DiffuseLight {
-    // pub fn new(a: Arc<dyn Texture>) -> Self {
-    //     Self { emit: a }
-    // }
-
     pub fn new_color(c: Color) -> Self {
         Self {
             emit: Arc::new(SolidColor::new(c)),
@@ -159,5 +155,34 @@ impl Material for DiffuseLight {
 
     fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color {
         self.emit.value(u, v, p)
+    }
+}
+
+pub struct Isotropic {
+    albedo: Arc<dyn Texture>,
+}
+
+impl Isotropic {
+    // pub fn new_texture(a: Arc<dyn Texture>) -> Self {
+    //     Self { albedo: a }
+    // }
+
+    pub fn new_color(c: Color) -> Self {
+        Self {
+            albedo: Arc::new(SolidColor::new(c)),
+        }
+    }
+}
+
+impl Material for Isotropic {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+        Some((
+            self.albedo.value(rec.u, rec.v, &rec.p),
+            Ray::new(&rec.p, &Vec3::random_in_unit_sphere(), r_in.tm),
+        ))
+    }
+
+    fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Color {
+        Color::zero()
     }
 }
